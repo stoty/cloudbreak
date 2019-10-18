@@ -1,12 +1,18 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.aws;
 
+import static java.lang.String.format;
+
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -18,7 +24,9 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCred
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBasedParameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
@@ -36,9 +44,13 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 @Component
 public class AwsCloudProvider extends AbstractCloudProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsCloudProvider.class);
 
     private static final String DEFAULT_STORAGE_NAME = "testsdx" + UUID.randomUUID().toString().replaceAll("-", "");
 
@@ -264,14 +276,35 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
-        imageCatalog.withUrl(awsProperties.getBaseimage().getImageCatalogUrl());
-        return imageCatalog;
+    public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
+        return imageSettings
+                .withImageId(awsProperties.getBaseimage().getImageId())
+                .withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 
-    @Override
-    public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings.withImageId(awsProperties.getBaseimage().getImageId())
-                .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName());
+    public String getPreviousAWSImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient)
+            throws TestFailException {
+
+        if (awsProperties.getBaseimage().getImageId() == null || awsProperties.getBaseimage().getImageId().isEmpty()) {
+            try {
+                List<ImageV4Response> images = cloudbreakClient
+                        .getCloudbreakClient()
+                        .imageCatalogV4Endpoint()
+                        .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
+                                CloudPlatform.AWS.name()).getCdhImages();
+
+                ImageV4Response olderImage = images.get(images.size() - 2);
+                Log.log(LOGGER, format(" Selected Image Date: %s | Image ID: %s | Stack Version: %s | Stack Description: %s ", olderImage.getDate(),
+                        olderImage.getUuid(), olderImage.getStackDetails().getVersion(), olderImage.getDescription()));
+                awsProperties.getBaseimage().setImageId(olderImage.getUuid());
+
+                return olderImage.getUuid();
+            } catch (Exception e) {
+                LOGGER.error("Cannot fetch images of {} image catalog!", imageCatalogTestDto.getRequest().getName());
+                throw new TestFailException(" Cannot fetch images of " + imageCatalogTestDto.getRequest().getName() + " image catalog!");
+            }
+        } else {
+            return awsProperties.getBaseimage().getImageId();
+        }
     }
 }
