@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.ArrayList;
@@ -236,6 +237,13 @@ public class EnvironmentService implements ResourceIdProvider {
             throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before Environment deletion [%s]",
                     String.join(", ", distroXClusterNames)));
         }
+
+        Set<String> experiencesConnectedToEnvironment = environmentResourceDeletionService.getExperiencesConnectedToEnvironment(env.getResourceCrn());
+        if (isNotEmpty(experiencesConnectedToEnvironment)) {
+            throw new BadRequestException(String.format("You have to delete/remove the following experience(s) before environment deletion [%s]",
+                    String.join(", ", experiencesConnectedToEnvironment)));
+        }
+
     }
 
     public List<EnvironmentDto> findAllByIdInAndStatusIn(Collection<Long> resourceIds, Collection<EnvironmentStatus> environmentStatuses) {

@@ -2,16 +2,17 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.environment.TempConstants.TEMP_WORKSPACE_ID;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
+import com.sequenceiq.environment.environment.experience.service.XService;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -49,15 +51,20 @@ public class EnvironmentResourceDeletionService {
 
     private final ClusterTemplateV4Endpoint clusterTemplateV4Endpoint;
 
+    private final XService xService;
+
+    //CHECKSTYLE:OFF
     public EnvironmentResourceDeletionService(SdxEndpoint sdxEndpoint, DatalakeV4Endpoint datalakeV4Endpoint, DistroXV1Endpoint distroXV1Endpoint,
-            ThreadBasedUserCrnProvider userCrnProvider, EventSender eventSender, ClusterTemplateV4Endpoint clusterTemplateV4Endpoint) {
+            ThreadBasedUserCrnProvider userCrnProvider, EventSender eventSender, XService xService, ClusterTemplateV4Endpoint clusterTemplateV4Endpoint) {
         this.sdxEndpoint = sdxEndpoint;
         this.datalakeV4Endpoint = datalakeV4Endpoint;
         this.distroXV1Endpoint = distroXV1Endpoint;
         this.userCrnProvider = userCrnProvider;
         this.eventSender = eventSender;
         this.clusterTemplateV4Endpoint = clusterTemplateV4Endpoint;
+        this.xService = xService;
     }
+    //CHECKSTYLE:ON
 
     public void deleteClusterDefinitionsOnCloudbreak(String environmentCrn) {
         try {
@@ -125,6 +132,10 @@ public class EnvironmentResourceDeletionService {
         return clusterNames;
     }
 
+    Set<String> getExperiencesConnectedToEnvironment(@NotNull String environmentCrn) {
+        return xService.environmentHasActiveExperience(environmentCrn);
+    }
+
     void triggerDeleteFlow(Environment environment) {
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
                 .withSelector(START_FREEIPA_DELETE_EVENT.selector())
@@ -132,7 +143,7 @@ public class EnvironmentResourceDeletionService {
                 .withResourceName(environment.getName())
                 .build();
         String userCrn = userCrnProvider.getUserCrn();
-        if (StringUtils.isEmpty(userCrn)) {
+        if (isEmpty(userCrn)) {
             LOGGER.warn("Delete flow is about to start, but user crn is not available!");
         }
         Map<String, Object> flowTriggerUsercrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
