@@ -10,7 +10,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +27,11 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
+@ConditionalOnProperty(
+        value = "freeipa.usersync.poller.enabled",
+        havingValue = "true",
+        matchIfMissing = false
+)
 public class UsersyncPoller {
     @VisibleForTesting
     static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
@@ -48,19 +53,15 @@ public class UsersyncPoller {
     @Inject
     private UmsEventGenerationIdsProvider umsEventGenerationIdsProvider;
 
-    @Value("${freeipa.syncoperation.poller.enabled:true}")
-    private boolean enabled;
-
     @Inject
     private EntitlementService entitlementService;
 
-    @Scheduled(fixedDelayString = "${freeipa.syncoperation.poller.fixed-delay-millis:60000}",
-            initialDelayString = "${freeipa.syncoperation.poller.initial-delay-millis:300000}")
+    @Scheduled(fixedDelayString = "${freeipa.usersync.poller.fixed-delay-millis:60000}",
+            initialDelayString = "${freeipa.usersync.poller.initial-delay-millis:300000}")
     public void pollUms() {
         try {
-            if (enabled) {
-                syncFreeIpaStacks();
-            }
+            LOGGER.debug("Polling for stale stacks");
+            syncFreeIpaStacks();
         } catch (Exception e) {
             LOGGER.error("Failed to automatically sync users to FreeIPA stacks", e);
         }
@@ -68,11 +69,12 @@ public class UsersyncPoller {
 
     @VisibleForTesting
     void syncFreeIpaStacks() {
-        threadBasedUserCrnProvider.setUserCrn(INTERNAL_ACTOR_CRN);
-        Optional<String> requestId = Optional.of(UUID.randomUUID().toString());
-        LOGGER.debug("Setting request id = {} for this poll", requestId);
-        MDCBuilder.addRequestId(requestId.get());
         try {
+            threadBasedUserCrnProvider.setUserCrn(INTERNAL_ACTOR_CRN);
+            Optional<String> requestId = Optional.of(UUID.randomUUID().toString());
+            LOGGER.debug("Setting request id = {} for this poll", requestId);
+            MDCBuilder.addRequestId(requestId.get());
+
             LOGGER.debug("Attempting to sync users to FreeIPA stacks");
             List<Stack> stackList = stackService.findAllRunning();
             LOGGER.debug("Found {} active stacks", stackList.size());
