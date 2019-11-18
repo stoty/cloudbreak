@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,6 +10,10 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
@@ -37,6 +42,8 @@ import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 @Service
 public class FreeIpaInstallService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaInstallService.class);
+
     @Inject
     private HostOrchestrator hostOrchestrator;
 
@@ -61,6 +68,9 @@ public class FreeIpaInstallService {
     @Inject
     private AltusMachineUserService altusMachineUserService;
 
+    @Inject
+    private FreeIpaClientFactory freeIpaClientFactory;
+
     public void installFreeIpa(Long stackId) throws CloudbreakOrchestratorException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDatas = stack.getNotDeletedInstanceMetaDataSet();
@@ -71,14 +81,34 @@ public class FreeIpaInstallService {
                 .collect(Collectors.toSet());
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
 
+        if (allNodes.isEmpty()) {
+            String errorMessage = "There are no nodes to install with FreeIPA.";
+            LOGGER.error(errorMessage);
+            throw new CloudbreakOrchestratorFailedException(errorMessage);
+        }
+        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+
         SaltConfig saltConfig = new SaltConfig();
         Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
-        Map<String, String> freeipaPillar = Map.of("realm", freeIpa.getDomain().toUpperCase(),
-                "domain", freeIpa.getDomain(),
-                "password", freeIpa.getAdminPassword());
+        Set<Object> hosts = allNodes.stream().map(n ->
+                Map.of("ip", n.getPrivateIp(),
+                        "fqdn", n.getHostname()))
+                .collect(Collectors.toSet());
+        Map<String, Object> freeipaPillar = new HashMap<>();
+        freeipaPillar.put("realm", freeIpa.getDomain().toUpperCase());
+        freeipaPillar.put("hosts", hosts);
+        freeipaPillar.put("mode", "FIRST_INSTALL");
+        freeipaPillar.put("domain", freeIpa.getDomain());
+        freeipaPillar.put("password", freeIpa.getAdminPassword());
+        freeipaPillar.put("admin_user", freeIpaClientFactory.getAdminUser());
+        freeipaPillar.put("freeipa_to_replicate", primaryGatewayConfig.getHostname());
         servicePillarConfig.put("freeipa", new SaltPillarProperties("/freeipa/init.sls", Collections.singletonMap("freeipa", freeipaPillar)));
         decoratePillarsWithTelemetryConfigs(stack, servicePillarConfig);
 
+        hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
+        hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
+
+        freeipaPillar.put("mode", "REPLICA_INSTALL");
         hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
         hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
     }
