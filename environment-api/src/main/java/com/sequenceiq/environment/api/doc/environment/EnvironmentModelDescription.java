@@ -61,6 +61,10 @@ public class EnvironmentModelDescription {
     public static final String S3_GUARD = "S3Guard parameters.";
     public static final String S3_GUARD_DYNAMO_TABLE_NAME = "S3Guard Dynamo table name.";
 
+    public static final String SHORT_CLUSTER_NAMES = "Configure short cluster names (max. 23 characters) instead of long ones (max. 40 characters). "
+            + "This setting is ignored and True by default when the 'createNiFiMachineUser' flag is set to True.";
+    public static final String CREATE_NIFI_MACHINE_USER = "Create NiFi machine user";
+
     private EnvironmentModelDescription() {
     }
 }

@@ -161,7 +161,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     public void testConversionWhenOptionalElementsAreProvided() throws IOException {
         setupAllocateRequest(true);
 
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(CloudPlatform.AWS.name())
                 .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName("myRegion").build())
                 .build();
@@ -227,7 +227,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 new CloudSubnet("subnet-1", "", "az-a", ""),
                 new CloudSubnet("subnet-2", "", "az-b", "")
         );
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(CloudPlatform.AWS.name())
                 .withName("envName")
                 .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName("myRegion").build())
@@ -273,7 +273,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
         allocateRequest.setCloudPlatform(CloudPlatform.AWS);
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(UNKNOWN_CLOUD_PLATFORM)
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
@@ -288,7 +288,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
         allocateRequest.setCloudPlatform(CloudPlatform.YARN);
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(CloudPlatform.YARN.name())
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);

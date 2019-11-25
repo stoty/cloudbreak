@@ -11,8 +11,21 @@ public class StackNameLengthValidator implements ConstraintValidator<ValidStackN
 
     private static final Integer MAX_LENGTH = 40;
 
+    private final Integer minLength;
+
+    private final Integer maxLength;
+
+    public StackNameLengthValidator() {
+        minLength = MIN_LENGTH;
+        maxLength = MAX_LENGTH;    }
+
+    public StackNameLengthValidator(Integer minLength, Integer maxLength) {
+        this.minLength = minLength;
+        this.maxLength = maxLength;
+    }
+
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        return Range.between(MIN_LENGTH, MAX_LENGTH).contains(value.length());
+        return Range.between(minLength, maxLength).contains(value.length());
     }
 }

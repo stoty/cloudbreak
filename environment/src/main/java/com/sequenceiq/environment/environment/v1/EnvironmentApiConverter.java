@@ -111,6 +111,8 @@ public class EnvironmentApiConverter {
                 .withExperimentalFeatures(ExperimentalFeatures.builder()
                         .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
                         .withTunnel(tunnelConverter.convert(request.getTunnel()))
+                        .withShortClusterNames(request.getShortClusterNames())
+                        .withCreateNiFiMachineUser(request.getCreateNiFiMachineUser())
                         .build())
                 .withParameters(getIfNotNull(request.getAws(), this::awsParamsToParametersDto));
 
@@ -218,7 +220,7 @@ public class EnvironmentApiConverter {
     }
 
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
-        DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.Builder.builder()
+        DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.builder()
                 .withCrn(environmentDto.getResourceCrn())
                 .withName(environmentDto.getName())
                 .withDescription(environmentDto.getDescription())
@@ -237,7 +239,9 @@ public class EnvironmentApiConverter {
                 .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
                 .withIdBrokerMappingSource(environmentDto.getExperimentalFeatures().getIdBrokerMappingSource())
                 .withAdminGroupName(environmentDto.getAdminGroupName())
-                .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams));
+                .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
+                .withShortClusterNames(environmentDto.getExperimentalFeatures().getShortClusterNames())
+                .withCreateNiFiMachineUser(environmentDto.getExperimentalFeatures().getCreateNiFiMachineUser());
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
         NullUtil.doIfNotNull(environmentDto.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessDtoToResponse(securityAccess)));

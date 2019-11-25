@@ -34,6 +34,17 @@ public class AltusMachineUserService {
     }
 
     /**
+     * Generate machine user for fluentd - databus communication
+     */
+    public Optional<String> generateDatabusMachineUserForFluent(Stack stack) {
+        return altusIAMService.generateMachineUser(getMachineUserName(stack), stack.getCreator().getUserCrn());
+    }
+
+    private String getMachineUserName(Stack stack) {
+        return "";
+    }
+
+    /**
      * Delete machine user with its access keys (and unassign databus role if required)
      */
     public void clearFluentMachineUser(Stack stack, Telemetry telemetry) {

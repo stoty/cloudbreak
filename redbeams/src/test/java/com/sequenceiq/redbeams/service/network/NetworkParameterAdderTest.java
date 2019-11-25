@@ -35,7 +35,7 @@ public class NetworkParameterAdderTest {
     @Test
     public void testAddParametersWhenAws() {
         Map<String, Object> parameters = new HashMap<>();
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(CloudPlatform.AWS.name())
                 .withNetwork(EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
                         .withAws(EnvironmentNetworkAwsParamsBuilder.anEnvironmentNetworkAwsParams().withVpcId(TEST_VPC_ID).build())

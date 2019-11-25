@@ -1,13 +1,9 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
-import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
-import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -28,9 +24,6 @@ public class AutoscaleStackV4Response {
     @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long stackId;
 
-    @ValidStackNameFormat
-    @ValidStackNameLength
-    @NotNull
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;
 

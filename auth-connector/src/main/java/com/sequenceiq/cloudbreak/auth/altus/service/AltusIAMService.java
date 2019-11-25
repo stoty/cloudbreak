@@ -33,6 +33,16 @@ public class AltusIAMService {
     }
 
     /**
+     * Generate machine user without access keys
+     */
+    public Optional<String> generateMachineUser(String machineUserName, String actorCrn) {
+        return umsClient.createMachineUser(
+                machineUserName,
+                actorCrn,
+                Optional.empty());
+    }
+
+    /**
      * Delete machine user with its access keys (and unassign databus role if required)
      */
     public void clearMachineUser(String machineUserName, String actorCrn) {

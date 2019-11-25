@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.stack;
 
-import static com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse.Builder.builder;
+import static com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse.builder;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;

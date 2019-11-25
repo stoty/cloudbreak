@@ -29,6 +29,10 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         this.credential = credential;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static final class Builder {
         private String crn;
 
@@ -70,11 +74,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private AwsEnvironmentParameters aws;
 
-        private Builder() {
-        }
+        private Boolean shortClusterNames;
 
-        public static Builder builder() {
-            return new Builder();
+        private Boolean createNiFiMachineUser;
+
+        private Builder() {
         }
 
         public Builder withCrn(String id) {
@@ -177,6 +181,16 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withShortClusterNames(Boolean shortClusterNames) {
+            this.shortClusterNames = shortClusterNames;
+            return this;
+        }
+
+        public Builder withCreateNiFiMachineUser(Boolean createNiFiMachineUser) {
+            this.createNiFiMachineUser = createNiFiMachineUser;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -199,6 +213,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setIdBrokerMappingSource(idBrokerMappingSource);
             detailedEnvironmentResponse.setAdminGroupName(adminGroupName);
             detailedEnvironmentResponse.setAws(aws);
+            detailedEnvironmentResponse.setShortClusterNames(shortClusterNames);
+            detailedEnvironmentResponse.setCreateNiFiMachineUser(createNiFiMachineUser);
             return detailedEnvironmentResponse;
         }
     }

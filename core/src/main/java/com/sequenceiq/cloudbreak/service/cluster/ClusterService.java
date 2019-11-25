@@ -594,6 +594,7 @@ public class ClusterService {
                     try {
                         clusterApiConnectors.getConnector(stack).clusterModificationService().cleanupCluster(telemetry);
                         altusMachineUserService.clearFluentMachineUser(stack, telemetry);
+                        altusMachineUserService.clearNifiMachineUser(stack, telemetry);
                     } catch (CloudbreakException e) {
                         LOGGER.error("Cluster specific cleanup failed.", e);
                     }

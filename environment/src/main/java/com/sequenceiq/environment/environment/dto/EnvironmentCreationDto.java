@@ -49,39 +49,25 @@ public class EnvironmentCreationDto {
 
     private final ExperimentalFeatures experimentalFeatures;
 
-    //CHECKSTYLE:OFF
-    public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
-            String creator, LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
-            Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
-            Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, String adminGroupName,
-            ParametersDto parameters, ExperimentalFeatures experimentalFeatures) {
-        //CHECKSTYLE:ON
-        this.name = name;
-        this.description = description;
-        this.cloudPlatform = cloudPlatform;
-        this.accountId = accountId;
-        this.creator = creator;
-        this.location = location;
-        this.network = network;
-        this.credential = credential;
-        this.createFreeIpa = createFreeIpa;
-        this.created = created;
-        if (CollectionUtils.isEmpty(regions)) {
-            this.regions = new HashSet<>();
-        } else {
-            this.regions = regions;
-        }
-        if (CollectionUtils.isEmpty(proxyNames)) {
-            this.proxyNames = new HashSet<>();
-        } else {
-            this.proxyNames = proxyNames;
-        }
-        this.authentication = authentication;
-        this.telemetry = telemetry;
-        this.securityAccess = securityAccess;
-        this.adminGroupName = adminGroupName;
-        this.parameters = parameters;
-        this.experimentalFeatures = experimentalFeatures != null ? experimentalFeatures : new ExperimentalFeatures();
+    public EnvironmentCreationDto(Builder builder) {
+        name = builder.name;
+        description = builder.description;
+        cloudPlatform = builder.cloudPlatform;
+        accountId = builder.accountId;
+        creator = builder.creator;
+        location = builder.location;
+        network = builder.network;
+        credential = builder.credential;
+        createFreeIpa = builder.createFreeIpa;
+        created = builder.created;
+        regions = CollectionUtils.isEmpty(builder.regions) ? new HashSet<>() : builder.regions;
+        proxyNames = CollectionUtils.isEmpty(builder.proxyNames) ? new HashSet<>() : builder.proxyNames;
+        authentication = builder.authentication;
+        telemetry = builder.telemetry;
+        securityAccess = builder.securityAccess;
+        adminGroupName = builder.adminGroupName;
+        parameters = builder.parameters;
+        experimentalFeatures = builder.experimentalFeatures == null ? new ExperimentalFeatures() : builder.experimentalFeatures;
     }
 
     public static Builder builder() {
@@ -291,9 +277,7 @@ public class EnvironmentCreationDto {
         }
 
         public EnvironmentCreationDto build() {
-            return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, creator,
-                    location, network, credential, regions, proxyNames, createFreeIpa, authentication,
-                    created, telemetry, securityAccess, adminGroupName, parameters, experimentalFeatures);
+            return new EnvironmentCreationDto(this);
         }
     }
 }

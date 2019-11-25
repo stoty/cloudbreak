@@ -1,6 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 
@@ -27,10 +29,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.validation.StackNameLengthValidator;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
@@ -51,6 +54,10 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 @Controller
 @InternalReady
 public class DistroXV1Controller implements DistroXV1Endpoint {
+
+    private static final int CLUSTER_NAME_MAX_LENGHT = 40;
+
+    private static final int SHORT_CLUSTER_NAME_MAX_LENGHT = 23;
 
     @Inject
     @Lazy
@@ -87,7 +94,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public StackViewV4Responses list(String environmentName, String environmentCrn) {
         StackViewV4Responses stackViewV4Responses;
         if (!Strings.isNullOrEmpty(environmentName)) {
-            stackViewV4Responses =  stackOperations.listByEnvironmentName(
+            stackViewV4Responses = stackOperations.listByEnvironmentName(
                     workspaceService.getForCurrentUser().getId(), environmentName, StackType.WORKLOAD);
         } else {
             stackViewV4Responses = stackOperations.listByEnvironmentCrn(
@@ -98,6 +105,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public StackV4Response post(@Valid DistroXV1Request request) {
+        validateClusterNameLength(request);
         return stackOperations.post(
                 workspaceService.getForCurrentUser().getId(),
                 stackRequestConverter.convert(request));
@@ -303,6 +311,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public GeneratedBlueprintV4Response postStackForBlueprintByName(String name, @Valid DistroXV1Request stackRequest) {
+        validateClusterNameLength(stackRequest);
         return stackOperations.postStackForBlueprint(
                 StackAccessDto.builder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -311,6 +320,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public GeneratedBlueprintV4Response postStackForBlueprintByCrn(String crn, @Valid DistroXV1Request stackRequest) {
+        validateClusterNameLength(stackRequest);
         return stackOperations.postStackForBlueprint(
                 StackAccessDto.builder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -417,6 +427,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     public Object getCreateAwsClusterForCli(DistroXV1Request request) {
         DetailedEnvironmentResponse env = environmentClientService.getByName(request.getEnvironmentName());
+        validateClusterNameLength(request, env);
         if (!CloudPlatform.AWS.name().equals(env.getCloudPlatform())) {
             return new EmptyResponse();
         }
@@ -425,6 +436,21 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     private StackV4Request getStackV4Request(StackAccessDto stackAccessDto) {
         return stackOperations.getRequest(stackAccessDto, workspaceService.getForCurrentUser().getId());
+    }
+
+    private void validateClusterNameLength(@Valid DistroXV1Request request) {
+        validateClusterNameLength(request, environmentClientService.getByName(request.getEnvironmentName()));
+    }
+
+    private void validateClusterNameLength(@Valid DistroXV1Request request, DetailedEnvironmentResponse env) {
+        MutableInt clusterNameLength = new MutableInt(CLUSTER_NAME_MAX_LENGHT);
+        Optional.ofNullable(env.getShortClusterNames())
+                .filter(b -> b)
+                .ifPresent((b) -> clusterNameLength.setValue(SHORT_CLUSTER_NAME_MAX_LENGHT));
+        StackNameLengthValidator validator = new StackNameLengthValidator(5, clusterNameLength.getValue());
+        if (!validator.isValid(request.getName(), null)) {
+            throw new BadRequestException(String.format("The length of the name has to be in range of 5 to %d", clusterNameLength.getValue()));
+        }
     }
 
     private Object getCreateAWSClusterRequest(StackV4Request stackV4Request) {

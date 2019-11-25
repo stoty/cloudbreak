@@ -6,14 +6,15 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
-import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 
 import io.swagger.annotations.ApiModelProperty;
 
 public abstract class DistroXV1Base implements Serializable, CloudPlatformProvider {
 
+    /**
+     * Removed @ValidStackNameLength validator until the EnvironmentRequest#shortClusterNames Feature Switch is being used
+     */
     @ValidStackNameFormat
-    @ValidStackNameLength
     @NotNull
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;

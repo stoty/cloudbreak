@@ -69,6 +69,12 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
 
+    @ApiModelProperty(EnvironmentModelDescription.SHORT_CLUSTER_NAMES)
+    private Boolean shortClusterNames;
+
+    @ApiModelProperty(EnvironmentModelDescription.CREATE_NIFI_MACHINE_USER)
+    private Boolean createNiFiMachineUser;
+
     public String getCrn() {
         return crn;
     }
@@ -219,5 +225,21 @@ public abstract class EnvironmentBaseResponse {
 
     public void setAws(AwsEnvironmentParameters aws) {
         this.aws = aws;
+    }
+
+    public Boolean getShortClusterNames() {
+        return shortClusterNames;
+    }
+
+    public void setShortClusterNames(Boolean shortClusterNames) {
+        this.shortClusterNames = shortClusterNames;
+    }
+
+    public Boolean getCreateNiFiMachineUser() {
+        return createNiFiMachineUser;
+    }
+
+    public void setCreateNiFiMachineUser(Boolean createNiFiMachineUser) {
+        this.createNiFiMachineUser = createNiFiMachineUser;
     }
 }
