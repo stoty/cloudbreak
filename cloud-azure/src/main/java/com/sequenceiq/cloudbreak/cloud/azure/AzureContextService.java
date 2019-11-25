@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -37,12 +38,21 @@ public class AzureContextService {
                     .map(CloudInstance::getTemplate).map(InstanceTemplate::getPrivateId).collect(Collectors.toList());
             List<CloudResource> groupInstances = getResourcesOfTypeInGroup(resources, group, ResourceType.AZURE_INSTANCE);
             List<CloudResource> groupVolumeSets = getResourcesOfTypeInGroup(resources, group, ResourceType.AZURE_VOLUMESET);
+            List<CloudResource> orphanVolumeSets = groupVolumeSets.stream().filter(vol -> Objects.isNull(vol.getInstanceId())).collect(Collectors.toList());
             List<CloudResource> resourceGroup = getResourcesOfTypeInGroup(resources, group, ResourceType.AZURE_RESOURCE_GROUP);
             context.addNetworkResources(resourceGroup);
             for (int i = 0; i < ids.size(); i++) {
-                context.addComputeResources(ids.get(i), List.of(groupInstances.get(i), groupVolumeSets.get(i)));
+                CloudResource instance = groupInstances.get(i);
+                CloudResource volumeSet = getVolumeSet(instance, groupVolumeSets, orphanVolumeSets, i);
+                context.addComputeResources(ids.get(i), List.of(instance, volumeSet));
             }
         });
+    }
+
+    private CloudResource getVolumeSet(CloudResource instance, List<CloudResource> groupVolumeSets, List<CloudResource> orphanVolumeSets, int orphanIndex) {
+        Optional<CloudResource> vol = groupVolumeSets.stream()
+                .filter(v -> v.getInstanceId() != null && v.getInstanceId().equals(instance.getInstanceId())).findFirst();
+        return vol.orElse(orphanVolumeSets.get(orphanIndex));
     }
 
     private List<CloudResource> getResourcesOfTypeInGroup(List<CloudResource> resources, Group group, ResourceType instance) {

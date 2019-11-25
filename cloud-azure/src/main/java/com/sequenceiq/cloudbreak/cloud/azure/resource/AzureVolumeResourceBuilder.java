@@ -68,12 +68,14 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         if (Objects.isNull(computeResources) || computeResources.isEmpty()) {
             return null;
         }
-        Optional<CloudResource> reattachableVolumeSet = computeResources.stream()
-                .filter(resource -> ResourceType.AZURE_VOLUMESET.equals(resource.getType()))
-                .findFirst();
-
         CloudResource vm = context.getComputeResources(privateId).stream()
                 .filter(cloudResource -> ResourceType.AZURE_INSTANCE.equals(cloudResource.getType())).findFirst().get();
+
+        Optional<CloudResource> reattachableVolumeSet = computeResources.stream()
+                .filter(resource -> ResourceType.AZURE_VOLUMESET.equals(resource.getType()))
+                .filter(cloudResource -> Objects.isNull(cloudResource.getInstanceId()) || cloudResource.getInstanceId().equals(vm.getInstanceId()))
+                .findFirst();
+
         return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, vm)));
     }
 
@@ -143,9 +145,12 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
             DeviceNameGenerator generator = new DeviceNameGenerator();
             futures.addAll(volumeSet.getVolumes().stream()
                     .map(volume -> intermediateBuilderExecutor.submit(() -> {
-                        Disk result = client.createManagedDisk(
-                                volume.getId(), volume.getSize(), AzureDiskType.getByValue(
-                                        volume.getType()), region, resourceGroupName, cloudStack.getTags());
+//                        Disk result = client.getDiskById(volume.getId());
+//                        if (result == null) {
+                          Disk result = client.createManagedDisk(
+                                    volume.getId(), volume.getSize(), AzureDiskType.getByValue(
+                                            volume.getType()), region, resourceGroupName, cloudStack.getTags());
+//                        }
                         String volumeId = result.id();
                         volumeSetMap.get(resource.getName()).add(new VolumeSetAttributes.Volume(volumeId, generator.next(), volume.getSize(), volume.getType()));
                     }))
