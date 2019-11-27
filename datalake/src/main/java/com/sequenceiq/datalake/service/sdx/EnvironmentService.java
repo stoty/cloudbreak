@@ -43,13 +43,13 @@ public class EnvironmentService {
     @Inject
     private EnvironmentClientService environmentClientService;
 
-    public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, String requestId) {
+    public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, Optional<String> requestId) {
         PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_ENV_POLLING, TimeUnit.SECONDS,
                 DURATION_IN_MINUTES_FOR_ENV_POLLING, TimeUnit.MINUTES);
         return waitAndGetEnvironment(sdxId, pollingConfig, requestId);
     }
 
-    public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, PollingConfig pollingConfig, String requestId) {
+    public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, PollingConfig pollingConfig, Optional<String> requestId) {
         Optional<SdxCluster> sdxClusterOptional = sdxClusterRepository.findById(sdxId);
         if (sdxClusterOptional.isPresent()) {
             SdxCluster sdxCluster = sdxClusterOptional.get();

@@ -8,6 +8,7 @@ import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.SdxUpgradeEvent.SDX_UPGRADE_EVENT;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -22,13 +23,13 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.flow.upgrade.event.SdxUpgradeStartEvent;
-import com.sequenceiq.datalake.logger.ThreadBasedRequestIdProvider;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
@@ -55,20 +56,17 @@ public class SdxReactorFlowManager {
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
-    @Inject
-    private ThreadBasedRequestIdProvider threadBasedRequestIdProvider;
-
     public void triggerSdxCreation(Long sdxId) {
         String selector = ENV_WAIT_EVENT.event();
         String userId = threadBasedUserCrnProvider.getUserCrn();
-        String requestId = threadBasedRequestIdProvider.getRequestId();
+        Optional<String> requestId = MDCUtils.getRequestId();
         notify(selector, new SdxEvent(selector, sdxId, userId, requestId));
     }
 
     public void triggerSdxDeletion(Long sdxId, boolean forced) {
         String selector = SDX_DELETE_EVENT.event();
         String userId = threadBasedUserCrnProvider.getUserCrn();
-        String requestId = threadBasedRequestIdProvider.getRequestId();
+        Optional<String> requestId = MDCUtils.getRequestId();
         notify(selector, new SdxDeleteStartEvent(selector, sdxId, userId, requestId, forced));
     }
 
@@ -79,34 +77,34 @@ public class SdxReactorFlowManager {
         }
         String selector = SDX_REPAIR_EVENT.event();
         String userId = threadBasedUserCrnProvider.getUserCrn();
-        String requestId = threadBasedRequestIdProvider.getRequestId();
+        Optional<String> requestId = MDCUtils.getRequestId();
         notify(selector, new SdxRepairStartEvent(selector, sdxId, userId, requestId, repairRequest));
     }
 
     public void triggerDatalakeUpgradeFlow(Long sdxId, UpgradeOptionV4Response upgradeOption) {
         String selector = SDX_UPGRADE_EVENT.event();
         String userId = threadBasedUserCrnProvider.getUserCrn();
-        String requestId = threadBasedRequestIdProvider.getRequestId();
+        Optional<String> requestId = MDCUtils.getRequestId();
         notify(selector, new SdxUpgradeStartEvent(selector, sdxId, userId, requestId, upgradeOption));
     }
 
     public void triggerSdxStartFlow(Long sdxId) {
         String selector = SDX_START_EVENT.event();
         String userId = threadBasedUserCrnProvider.getUserCrn();
-        String requestId = threadBasedRequestIdProvider.getRequestId();
+        Optional<String> requestId = MDCUtils.getRequestId();
         notify(selector, new SdxStartStartEvent(selector, sdxId, userId, requestId));
     }
 
     public void triggerSdxStopFlow(Long sdxId) {
         String selector = SDX_STOP_EVENT.event();
         String userId = threadBasedUserCrnProvider.getUserCrn();
-        String requestId = threadBasedRequestIdProvider.getRequestId();
+        Optional<String> requestId = MDCUtils.getRequestId();
         notify(selector, new SdxStartStopEvent(selector, sdxId, userId, requestId));
     }
 
     public void cancelRunningFlows(Long sdxId) {
         String userId = threadBasedUserCrnProvider.getUserCrn();
-        String requestId = threadBasedRequestIdProvider.getRequestId();
+        Optional<String> requestId = MDCUtils.getRequestId();
         SdxEvent cancelEvent = new SdxEvent(Flow2Handler.FLOW_CANCEL, sdxId, userId, requestId);
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
     }

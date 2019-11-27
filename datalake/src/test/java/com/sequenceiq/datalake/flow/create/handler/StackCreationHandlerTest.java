@@ -9,6 +9,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +41,7 @@ class StackCreationHandlerTest {
 
     private static String userId = "userId";
 
-    private static String requestId = "requestId";
+    private static Optional<String> requestId = Optional.of("requestId");
 
     private static String sdxCrn = "sdxCrn";
 

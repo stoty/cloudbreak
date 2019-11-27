@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow;
 
+import java.util.Optional;
+
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -9,9 +11,9 @@ public class SdxContext extends CommonContext {
 
     private String userId;
 
-    private String requestId;
+    private Optional<String> requestId;
 
-    public SdxContext(FlowParameters flowParameters, Long sdxId, String userId, String requestId) {
+    public SdxContext(FlowParameters flowParameters, Long sdxId, String userId, Optional<String> requestId) {
         super(flowParameters);
         this.sdxId = sdxId;
         this.userId = userId;
@@ -45,11 +47,11 @@ public class SdxContext extends CommonContext {
         this.userId = userId;
     }
 
-    public String getRequestId() {
+    public Optional<String> getRequestId() {
         return requestId;
     }
 
-    public void setRequestId(String requestId) {
+    public void setRequestId(Optional<String> requestId) {
         this.requestId = requestId;
     }
 

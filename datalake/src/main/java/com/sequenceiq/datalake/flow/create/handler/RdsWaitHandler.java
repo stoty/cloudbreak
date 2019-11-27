@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.datalake.service.sdx.DatabaseService.DURATION_IN_MINUTES_FOR_DB_POLLING;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -61,7 +62,7 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
         RdsWaitRequest rdsWaitRequest = event.getData();
         Long sdxId = rdsWaitRequest.getResourceId();
         String userId = rdsWaitRequest.getUserId();
-        String requestId = rdsWaitRequest.getRequestId();
+        Optional<String> requestId = rdsWaitRequest.getRequestId();
         MDCBuilder.addRequestId(requestId);
         DetailedEnvironmentResponse env = rdsWaitRequest.getDetailedEnvironmentResponse();
         try {

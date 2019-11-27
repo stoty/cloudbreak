@@ -2,6 +2,8 @@ package com.sequenceiq.datalake.flow.create.handler;
 
 import static com.sequenceiq.datalake.service.sdx.EnvironmentService.DURATION_IN_MINUTES_FOR_ENV_POLLING;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -48,7 +50,7 @@ public class EnvWaitHandler extends ExceptionCatcherEventHandler<EnvWaitRequest>
         EnvWaitRequest envWaitRequest = event.getData();
         Long datalakeId = envWaitRequest.getResourceId();
         String userId = envWaitRequest.getUserId();
-        String requestId = envWaitRequest.getRequestId();
+        Optional<String> requestId = envWaitRequest.getRequestId();
         MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {

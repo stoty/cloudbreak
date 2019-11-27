@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.repair.handler;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -48,7 +49,7 @@ public class SdxRepairWaitHandler implements EventHandler<SdxRepairWaitRequest> 
         SdxRepairWaitRequest sdxRepairWaitRequest = event.getData();
         Long sdxId = sdxRepairWaitRequest.getResourceId();
         String userId = sdxRepairWaitRequest.getUserId();
-        String requestId = sdxRepairWaitRequest.getRequestId();
+        Optional<String> requestId = sdxRepairWaitRequest.getRequestId();
         MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {

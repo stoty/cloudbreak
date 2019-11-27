@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.flow.upgrade.handler;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -50,7 +51,7 @@ public class SdxChangeImageWaitHandler implements EventHandler<SdxChangeImageWai
         MDCBuilder.addRequestId(request.getRequestId());
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
-        String requestId = request.getRequestId();
+        Optional<String> requestId = request.getRequestId();
         Selectable response;
         try {
             LOGGER.info("Start polling change image process for id: {}", sdxId);

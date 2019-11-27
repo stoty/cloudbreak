@@ -63,7 +63,7 @@ class ProvisionerServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
 
-    private static final String REQUEST_ID = "requestId";
+    private static final Optional<String> REQUEST_ID = Optional.of("requestId");
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;

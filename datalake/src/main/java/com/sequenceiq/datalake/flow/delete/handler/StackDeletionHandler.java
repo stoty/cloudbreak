@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.delete.handler;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -51,7 +52,7 @@ public class StackDeletionHandler implements EventHandler<StackDeletionWaitReque
         StackDeletionWaitRequest stackDeletionWaitRequest = event.getData();
         Long sdxId = stackDeletionWaitRequest.getResourceId();
         String userId = stackDeletionWaitRequest.getUserId();
-        String requestId = stackDeletionWaitRequest.getRequestId();
+        Optional<String> requestId = stackDeletionWaitRequest.getRequestId();
         MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {

@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.create.handler;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -55,7 +56,7 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
         StackCreationWaitRequest stackCreationWaitRequest = handlerEvent.getData();
         Long sdxId = stackCreationWaitRequest.getResourceId();
         String userId = stackCreationWaitRequest.getUserId();
-        String requestId = stackCreationWaitRequest.getRequestId();
+        Optional<String> requestId = stackCreationWaitRequest.getRequestId();
         MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {

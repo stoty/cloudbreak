@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -75,7 +76,7 @@ public class DatabaseServiceTest {
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.create(cluster, env, "ID");
+            underTest.create(cluster, env, Optional.of("ID"));
         });
 
         verify(databaseServerV4Endpoint).create(captor.capture());

@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -62,7 +63,7 @@ public class DatabaseService {
     @Inject
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
 
-    public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env, String requestId) {
+    public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env, Optional<String> requestId) {
         LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
         String dbResourceCrn;
         if (dbHasBeenCreatedPreviously(sdxCluster)) {
@@ -88,7 +89,7 @@ public class DatabaseService {
         return Strings.isNotEmpty(sdxCluster.getDatabaseCrn());
     }
 
-    public void terminate(SdxCluster sdxCluster, String requestId, boolean forced) {
+    public void terminate(SdxCluster sdxCluster, Optional<String> requestId, boolean forced) {
         LOGGER.info("Terminating databaseServer of SDX {}", sdxCluster.getClusterName());
         try {
             DatabaseServerV4Response resp = databaseServerV4Endpoint.deleteByCrn(sdxCluster.getDatabaseCrn(), forced);
@@ -130,14 +131,14 @@ public class DatabaseService {
     }
 
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn,
-            SdxDatabaseOperation sdxDatabaseOperation, String requestId, boolean cancellable) {
+            SdxDatabaseOperation sdxDatabaseOperation, Optional<String> requestId, boolean cancellable) {
         PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_DB_POLLING, TimeUnit.SECONDS,
                 DURATION_IN_MINUTES_FOR_DB_POLLING, TimeUnit.MINUTES);
         return waitAndGetDatabase(sdxCluster, databaseCrn, pollingConfig, sdxDatabaseOperation, requestId, cancellable);
     }
 
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn, PollingConfig pollingConfig,
-            SdxDatabaseOperation sdxDatabaseOperation, String requestId, boolean cancellable) {
+            SdxDatabaseOperation sdxDatabaseOperation, Optional<String> requestId, boolean cancellable) {
         DatabaseServerStatusV4Response response = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())

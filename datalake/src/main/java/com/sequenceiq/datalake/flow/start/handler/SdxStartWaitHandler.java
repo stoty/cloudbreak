@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.start.handler;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -48,7 +49,7 @@ public class SdxStartWaitHandler implements EventHandler<SdxStartWaitRequest> {
         SdxStartWaitRequest waitRequest = event.getData();
         Long sdxId = waitRequest.getResourceId();
         String userId = waitRequest.getUserId();
-        String requestId = waitRequest.getRequestId();
+        Optional<String> requestId = waitRequest.getRequestId();
         MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {

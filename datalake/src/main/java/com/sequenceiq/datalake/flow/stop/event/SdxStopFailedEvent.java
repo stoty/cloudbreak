@@ -1,12 +1,14 @@
 package com.sequenceiq.datalake.flow.stop.event;
 
+import java.util.Optional;
+
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class SdxStopFailedEvent extends SdxEvent {
 
     private Exception exception;
 
-    public SdxStopFailedEvent(Long sdxId, String userId, String requestId, Exception exception) {
+    public SdxStopFailedEvent(Long sdxId, String userId, Optional<String> requestId, Exception exception) {
         super(sdxId, userId, requestId);
         this.exception = exception;
     }

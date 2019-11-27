@@ -1,12 +1,14 @@
 package com.sequenceiq.datalake.flow.create.event;
 
+import java.util.Optional;
+
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class SdxCreateFailedEvent extends SdxEvent {
 
     private Exception exception;
 
-    public SdxCreateFailedEvent(Long sdxId, String userId, String requestId, Exception exception) {
+    public SdxCreateFailedEvent(Long sdxId, String userId, Optional<String> requestId, Exception exception) {
         super(sdxId, userId, requestId);
         this.exception = exception;
     }

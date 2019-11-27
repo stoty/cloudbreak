@@ -74,7 +74,7 @@ public class ProvisionerService {
         });
     }
 
-    public void waitCloudbreakClusterDeletion(Long id, PollingConfig pollingConfig, String requestId) {
+    public void waitCloudbreakClusterDeletion(Long id, PollingConfig pollingConfig, Optional<String> requestId) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                     .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
@@ -132,7 +132,7 @@ public class ProvisionerService {
         });
     }
 
-    public void waitCloudbreakClusterCreation(Long id, PollingConfig pollingConfig, String requestId) {
+    public void waitCloudbreakClusterCreation(Long id, PollingConfig pollingConfig, Optional<String> requestId) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS,
                     ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake stack creation in progress", sdxCluster);

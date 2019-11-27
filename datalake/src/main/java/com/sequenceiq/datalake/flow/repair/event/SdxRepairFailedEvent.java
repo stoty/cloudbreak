@@ -1,12 +1,14 @@
 package com.sequenceiq.datalake.flow.repair.event;
 
+import java.util.Optional;
+
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class SdxRepairFailedEvent extends SdxEvent {
 
     private Exception exception;
 
-    public SdxRepairFailedEvent(Long sdxId, String userId, String requestId, Exception exception) {
+    public SdxRepairFailedEvent(Long sdxId, String userId, Optional<String> requestId, Exception exception) {
         super(sdxId, userId, requestId);
         this.exception = exception;
     }

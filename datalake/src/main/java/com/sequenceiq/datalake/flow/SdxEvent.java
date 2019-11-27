@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow;
 
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
@@ -15,11 +17,11 @@ public class SdxEvent implements Selectable, Acceptable {
 
     private final String userId;
 
-    private final String requestId;
+    private final Optional<String> requestId;
 
     private final Promise<Boolean> accepted;
 
-    public SdxEvent(Long sdxId, String userId, String requestId) {
+    public SdxEvent(Long sdxId, String userId, Optional<String> requestId) {
         this(null, sdxId, userId, requestId);
     }
 
@@ -27,7 +29,7 @@ public class SdxEvent implements Selectable, Acceptable {
         this(null, context.getSdxId(), context.getUserId(), context.getRequestId());
     }
 
-    public SdxEvent(String selector, Long sdxId, String userId, String requestId) {
+    public SdxEvent(String selector, Long sdxId, String userId, Optional<String> requestId) {
         this.selector = selector;
         this.sdxId = sdxId;
         this.userId = userId;
@@ -39,7 +41,7 @@ public class SdxEvent implements Selectable, Acceptable {
         this(selector, context.getSdxId(), context.getUserId(), context.getRequestId());
     }
 
-    public SdxEvent(String selector, Long sdxId, String userId, String requestId, Promise<Boolean> accepted) {
+    public SdxEvent(String selector, Long sdxId, String userId, Optional<String> requestId, Promise<Boolean> accepted) {
         this.selector = selector;
         this.sdxId = sdxId;
         this.userId = userId;
@@ -56,7 +58,7 @@ public class SdxEvent implements Selectable, Acceptable {
         return userId;
     }
 
-    public String getRequestId() {
+    public Optional<String> getRequestId() {
         return requestId;
     }
 

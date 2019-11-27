@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.stop.handler;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -46,7 +48,7 @@ public class SdxStopAllDatahubHandler implements EventHandler<SdxStopAllDatahubR
         SdxStopAllDatahubRequest stopAllDatahubRequest = event.getData();
         Long sdxId = stopAllDatahubRequest.getResourceId();
         String userId = stopAllDatahubRequest.getUserId();
-        String requestId = stopAllDatahubRequest.getRequestId();
+        Optional<String> requestId = stopAllDatahubRequest.getRequestId();
         MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {

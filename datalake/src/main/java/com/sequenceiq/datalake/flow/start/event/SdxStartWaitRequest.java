@@ -1,11 +1,13 @@
 package com.sequenceiq.datalake.flow.start.event;
 
+import java.util.Optional;
+
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class SdxStartWaitRequest extends SdxEvent {
 
-    public SdxStartWaitRequest(Long sdxId, String userId, String requestId) {
+    public SdxStartWaitRequest(Long sdxId, String userId, Optional<String> requestId) {
         super(sdxId, userId, requestId);
     }
 

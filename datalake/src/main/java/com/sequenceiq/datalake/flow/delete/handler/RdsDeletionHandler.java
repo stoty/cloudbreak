@@ -2,6 +2,8 @@ package com.sequenceiq.datalake.flow.delete.handler;
 
 import static com.sequenceiq.datalake.service.sdx.DatabaseService.DURATION_IN_MINUTES_FOR_DB_POLLING;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.apache.logging.log4j.util.Strings;
@@ -57,7 +59,7 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
         RdsDeletionWaitRequest rdsWaitRequest = event.getData();
         Long sdxId = rdsWaitRequest.getResourceId();
         String userId = rdsWaitRequest.getUserId();
-        String requestId = rdsWaitRequest.getRequestId();
+        Optional<String> requestId = rdsWaitRequest.getRequestId();
         MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {

@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.upgrade.event;
 
+import java.util.Optional;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -8,7 +10,7 @@ public class SdxChangeImageWaitRequest extends SdxEvent {
 
     private UpgradeOptionV4Response upgradeOption;
 
-    public SdxChangeImageWaitRequest(Long sdxId, String userId, String requestId, UpgradeOptionV4Response upgradeOption) {
+    public SdxChangeImageWaitRequest(Long sdxId, String userId, Optional<String> requestId, UpgradeOptionV4Response upgradeOption) {
         super(sdxId, userId, requestId);
         this.upgradeOption = upgradeOption;
     }
