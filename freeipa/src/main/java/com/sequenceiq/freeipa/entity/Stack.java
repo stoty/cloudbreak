@@ -17,6 +17,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.type.Tunnel;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "environmentcrn", "terminated"}))
@@ -62,7 +65,11 @@ public class Stack {
 
     private Integer gatewayport;
 
+    @Deprecated
     private Boolean useCcm = Boolean.FALSE;
+
+    @Enumerated(EnumType.STRING)
+    private Tunnel tunnel = Tunnel.DIRECT;
 
     private Boolean clusterProxyRegistered = Boolean.FALSE;
 
@@ -175,6 +182,14 @@ public class Stack {
 
     public void setUseCcm(Boolean useCcm) {
         this.useCcm = useCcm;
+    }
+
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
     }
 
     public boolean getClusterProxyRegistered() {

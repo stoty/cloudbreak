@@ -2,7 +2,7 @@ package com.sequenceiq.environment.credential.v1.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
+import com.sequenceiq.common.api.type.Tunnel;
 
 @Component
 public class TunnelConverter {

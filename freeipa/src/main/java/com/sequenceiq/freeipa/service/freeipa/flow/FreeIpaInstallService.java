@@ -79,7 +79,7 @@ public class FreeIpaInstallService {
         servicePillarConfig.put("freeipa", new SaltPillarProperties("/freeipa/init.sls", Collections.singletonMap("freeipa", freeipaPillar)));
         decoratePillarsWithTelemetryConfigs(stack, servicePillarConfig);
         servicePillarConfig.put("ccm",
-                new SaltPillarProperties("/ccm/init.sls", Collections.singletonMap("ccm", Collections.singletonMap("enabled", stack.getUseCcm()))));
+                new SaltPillarProperties("/ccm/init.sls", Collections.singletonMap("ccm", Collections.singletonMap("enabled", stack.getTunnel().useCcm()))));
         hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
         hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
     }
