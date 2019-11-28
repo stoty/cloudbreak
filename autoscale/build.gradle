@@ -58,7 +58,7 @@ dependencyManagement {
             entry 'spring-boot-starter-freemarker'
         }
 
-        dependencySet(group: 'io.springfox', version: '2.5.0') {
+        dependencySet(group: 'io.springfox', version: '2.9.2') {
             entry 'springfox-swagger2'
             entry 'springfox-core'
             entry 'springfox-swagger-ui'
@@ -85,7 +85,7 @@ dependencyManagement {
         dependency group: 'org.codehaus.groovy',                name: 'groovy-all',                version: '2.5.0'
         dependency group: 'org.apache.hadoop',                  name: 'hadoop-yarn-api',           version: hadoopVersion
         dependency group: 'org.freemarker',                     name: 'freemarker',                version: freemarkerVersion
-        dependency group: 'org.quartz-scheduler',               name: 'quartz',                    version: '2.3.0'
+        dependency group: 'org.quartz-scheduler',               name: 'quartz',                    version: '2.3.2'
         dependency group: 'org.postgresql',                     name: 'postgresql',                version: postgreSQLVersion
         dependency group: 'org.mybatis',                        name: 'mybatis-migrations',        version: '3.2.0'
         dependency group: 'org.mockito',                        name: 'mockito-core',              version: mockitoVersion
