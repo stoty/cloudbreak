@@ -29,12 +29,12 @@ import com.sequenceiq.datalake.flow.start.event.SdxStartWaitRequest;
 import com.sequenceiq.datalake.flow.start.event.SdxSyncSuccessEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxSyncWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
-import com.sequenceiq.datalake.service.sdx.SdxJobService;
 import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.statuschecker.service.JobService;
 
 @Configuration
 public class SdxStartActions {
@@ -48,7 +48,7 @@ public class SdxStartActions {
     private SdxStartService startService;
 
     @Inject
-    private SdxJobService sdxJobService;
+    private JobService jobService;
 
     @Bean(name = "SDX_START_SYNC_STATE")
     public Action<?, ?> sdxSync() {
@@ -145,7 +145,6 @@ public class SdxStartActions {
                 LOGGER.info("SDX start finalized: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.SDX_START_FINISHED, "Datalake is running",
                         payload.getResourceId());
-                sdxJobService.schedule(context.getSdxId());
                 sendEvent(context, SDX_START_FINALIZED_EVENT.event(), payload);
             }
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.configuration;
+package com.sequenceiq.statuschecker.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.quartz.SchedulerFactoryBeanCustomizer;
@@ -13,7 +13,9 @@ public class SchedulerFactoryConfig {
 
     @Bean
     public SchedulerFactoryBeanCustomizer schedulerFactoryBeanCustomizer() {
-        return bean -> bean.setAutoStartup(autoSyncEnabled);
+        return bean -> {
+            bean.setAutoStartup(autoSyncEnabled);
+        };
     }
 
 }
