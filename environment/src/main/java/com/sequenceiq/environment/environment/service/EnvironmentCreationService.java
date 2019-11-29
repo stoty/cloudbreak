@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
@@ -83,24 +84,32 @@ public class EnvironmentCreationService {
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
-        if (environmentService.isNameOccupied(creationDto.getName(), creationDto.getAccountId())) {
-            throw new BadRequestException(String.format("Environment with name '%s' already exists in account '%s'.",
-                    creationDto.getName(), creationDto.getAccountId()));
+        Environment environment = new Environment();
+        try {
+            if (environmentService.isNameOccupied(creationDto.getName(), creationDto.getAccountId())) {
+                throw new BadRequestException(String.format("Environment with name '%s' already exists in account '%s'.",
+                        creationDto.getName(), creationDto.getAccountId()));
+            }
+            environment = initializeEnvironment(creationDto);
+            environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
+            if (!createVirtualGroups(creationDto, environment.getResourceCrn())) {
+                // To keep backward compatibility, if somebody passes the group name, then we shall just use it
+                environmentService.setAdminGroupName(environment, creationDto.getAdminGroupName());
+            }
+            CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
+            Map<String, CloudSubnet> subnetMetas = networkService.retrieveSubnetMetadata(environment, creationDto.getNetwork());
+            validateCreation(creationDto, environment, cloudRegions, subnetMetas);
+            environment = environmentService.save(environment);
+            environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), creationDto.getAccountId(), subnetMetas);
+            createAndSetParameters(environment, creationDto.getParameters());
+            environmentService.save(environment);
+            reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());
+        } catch (Exception e) {
+            environment.setStatus(EnvironmentStatus.CREATE_FAILED);
+            environment.setStatusReason(e.getMessage());
+            environmentService.save(environment);
+            throw e;
         }
-        Environment environment = initializeEnvironment(creationDto);
-        environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
-        if (!createVirtualGroups(creationDto, environment.getResourceCrn())) {
-            // To keep backward compatibility, if somebody passes the group name, then we shall just use it
-            environmentService.setAdminGroupName(environment, creationDto.getAdminGroupName());
-        }
-        CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
-        Map<String, CloudSubnet> subnetMetas = networkService.retrieveSubnetMetadata(environment, creationDto.getNetwork());
-        validateCreation(creationDto, environment, cloudRegions, subnetMetas);
-        environment = environmentService.save(environment);
-        environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), creationDto.getAccountId(), subnetMetas);
-        createAndSetParameters(environment, creationDto.getParameters());
-        environmentService.save(environment);
-        reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());
         return environmentDtoConverter.environmentToDto(environment);
     }
 
@@ -148,7 +157,8 @@ public class EnvironmentCreationService {
                 .toString();
     }
 
-    private void validateCreation(EnvironmentCreationDto creationDto, Environment environment, CloudRegions cloudRegions, Map<String, CloudSubnet> subnetMetas) {
+    private void validateCreation(EnvironmentCreationDto creationDto, Environment environment, CloudRegions cloudRegions,
+            Map<String, CloudSubnet> subnetMetas) {
         ValidationResultBuilder validationBuilder = validatorService
                 .validateRegionsAndLocation(creationDto.getLocation().getName(), creationDto.getRegions(), environment, cloudRegions);
         ValidationResultBuilder networkValidation = validatorService.validateNetworkCreation(environment, creationDto.getNetwork(), subnetMetas);

@@ -99,7 +99,7 @@ class EnvironmentCreationServiceTest {
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 
-        verify(environmentService, never()).save(any());
+        verify(environmentService, times(1)).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
     }
@@ -139,7 +139,7 @@ class EnvironmentCreationServiceTest {
         when(entitlementService.azureEnabled(eq(CRN), eq(ACCOUNT_ID))).thenReturn(false);
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 
-        verify(environmentService, never()).save(any());
+        verify(environmentService, times(1)).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
     }
@@ -220,7 +220,7 @@ class EnvironmentCreationServiceTest {
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 
-        verify(environmentService, never()).save(any());
+        verify(environmentService, times(1)).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
     }
@@ -262,7 +262,7 @@ class EnvironmentCreationServiceTest {
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 
-        verify(environmentService, never()).save(any());
+        verify(environmentService, times(1)).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
     }
